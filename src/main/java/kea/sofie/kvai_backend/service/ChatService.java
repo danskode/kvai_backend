@@ -1,62 +1,69 @@
 package kea.sofie.kvai_backend.service;
 
+import kea.sofie.kvai_backend.model.Politician;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ChatService {
 
-    private final OllamaChatModel chatModel;
-    private String selectedPolitician = null; // Ingen politiker valgt fra start
 
+    private List<Politician> politicians;
+    private final ChatClient chatClient;
 
-    public ChatService(OllamaChatModel chatModel) {
-        this.chatModel = chatModel;
+    @Autowired
+    public ChatService( ChatClient chatClient) {
+        this.chatClient = chatClient;
+        this.politicians = List.of(
+                new Politician("Mette Frederiksen", "Socialdemokratiet"),
+                new Politician("Jakob Næsager", "Konservative"),
+                new Politician("Mia Nyegaard", "Radikale Venstre")
+        );
     }
 
-    public void setPolitician(String politician) {
-        this.selectedPolitician = politician;
-    }
+    public String getAIResponse(String userMessage, String politicianName) {
+        // find en politiker
+        Politician selectedPolitician = politicians.stream()
+                .filter(p -> p.getName().equalsIgnoreCase(politicianName))
+                .findFirst()
+                .orElse(null);
 
-
-    public String getAIResponse(String userMessage) {
-        String candidateInfo = getCandidateInfo(selectedPolitician);
-        String fullPrompt = candidateInfo + "\n\nBruger: " + userMessage + "\nPolitiker:";
-        return chatModel.call(fullPrompt);
-    }
-
-
-    // Bare et par hardkodet kandidater - prøvede at bruge det til frontend, men gik ikke så godt.
-    private String getCandidateInfo(String politician) {
-
-        if (politician == null || politician.isBlank()) {
-            return "Vælg venligst en politiker først.";
+        // burde ikke være nødvendig da vi bruger dropdooown
+        if (selectedPolitician == null) {
+            return "Beklager, jeg kunne ikke finde den valgte politiker.";
         }
 
-        return switch (politician) {
+        // det her bare er midlertidigt.
+        String politicianPrompt = switch (selectedPolitician.getName()) {
             case "Mette Frederiksen" -> """
-        Du er Mette Frederiksen, Danmarks Statsminister. 
-        Dit parti er Socialdemokratiet, og dine kerneværdier er europæiske værdier, 
-        ligestilling, menneskerettigheder og social retfærdighed. 
-        Dit yndlingsmotto er: 'Køb, køb, køb!'.
-        """;
-            case "Pernille Rosenkrantz-Theil" -> """
-        Du er Pernille Rosenkrantz-Theil, medlem af Socialdemokratiet og tidligere minister.
-        Du kæmper for et stærkt velfærdssamfund, uddannelse og børns rettigheder.
-        Du er kendt for din direkte kommunikationsstil og stærke holdninger.
-        """;
+            Du er en fiktiv version af Mette Frederiksen, Danmarks statsminister fra Socialdemokratiet. 
+            Du svarer som en erfaren leder med fokus på velfærd, økonomi og tryghed.
+            Du taler i et forståeligt sprog, men med en professionel tone.
+            """;
             case "Jakob Næsager" -> """
-        Du er Jakob Næsager, medlem af Det Konservative Folkeparti og borgmester i Københavns Kommune.
-        Du arbejder for en ansvarlig økonomisk politik, trygge bymiljøer og bedre skoleforhold.
-        Du lægger vægt på borgerinddragelse og klassiske konservative værdier.
-        """;
+            Du er en fiktiv version af Jakob Næsager fra Konservative. 
+            Du prioriterer familiepolitik og erhvervsliv og svarer med konservative værdier i fokus.
+            """;
             case "Mia Nyegaard" -> """
-        Du er Mia Nyegaard, medlem af Radikale Venstre og socialborgmester i København.
-        Du brænder for socialpolitik, integration og rettigheder for udsatte grupper.
-        Du tror på dialog og samarbejde som vejen til forandring.
-        """;
-            default -> "Jeg kender ikke denne politiker.";
+            Du er en fiktiv version af Mia Nyegaard fra Radikale Venstre. 
+            Du fokuserer på uddannelse og bæredygtighed og taler med en optimistisk og progressiv tone.
+            """;
+            default -> "Du er en politiker. Svar med en professionel og venlig tone."; // Standard fallback
         };
+        // Kombiner prompten og brugerens besked
+        String fullPrompt = politicianPrompt + "\n\nBruger: " + userMessage;
 
-}
+        // besked fra ai
+        return chatClient.prompt(fullPrompt)
+                .call()
+                .content();
+
+//        // bliver ikke brugt endnu. men her kan vi smide data ind fra en vector db??
+//        String relevantData = "Politikerens holdninger fra databasen...";
+
+    }
 }

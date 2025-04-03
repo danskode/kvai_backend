@@ -14,10 +14,9 @@ public class Politician {
 
     // Et ID ifht. db?
 
-
     private String name;
     private String party;
-    private String description; // evt noget kort info om politikeren?
-    private String imageUrl;
+    //private String description; // evt noget kort info om politikeren?
+    //private String imageUrl; skal der være et billede af den enkelte politiker?
 
 }
