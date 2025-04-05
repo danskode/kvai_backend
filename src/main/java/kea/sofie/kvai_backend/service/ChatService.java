@@ -1,8 +1,12 @@
 package kea.sofie.kvai_backend.service;
 
 import kea.sofie.kvai_backend.model.Politician;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+//import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,17 +16,20 @@ import java.util.List;
 public class ChatService {
 
 
+    private static final Logger log = LoggerFactory.getLogger(ChatService.class);
     private List<Politician> politicians;
     private final ChatClient chatClient;
+    private final VectorStore vectorStore;
 
     @Autowired
-    public ChatService( ChatClient chatClient) {
+    public ChatService( ChatClient chatClient, VectorStore vectorStore) {
         this.chatClient = chatClient;
         this.politicians = List.of(
                 new Politician("Mette Frederiksen", "Socialdemokratiet"),
                 new Politician("Jakob Næsager", "Konservative"),
                 new Politician("Mia Nyegaard", "Radikale Venstre")
         );
+        this.vectorStore = vectorStore;
     }
 
     public String getAIResponse(String userMessage, String politicianName) {
@@ -32,7 +39,7 @@ public class ChatService {
                 .findFirst()
                 .orElse(null);
 
-        // burde ikke være nødvendig da vi bruger dropdooown
+        // burde ikke være nødvendig da vi bruger dropdown <-- jo, for vi skal nok have en tom som standard :)
         if (selectedPolitician == null) {
             return "Beklager, jeg kunne ikke finde den valgte politiker.";
         }
@@ -57,8 +64,14 @@ public class ChatService {
         // Kombiner prompten og brugerens besked
         String fullPrompt = politicianPrompt + "\n\nBruger: " + userMessage;
 
+        log.info("LOG1: " + politicianPrompt);
+        log.info("LOG2: " + userMessage);
+        log.info("LOG3: " + fullPrompt);
+
         // besked fra ai
-        return chatClient.prompt(fullPrompt)
+        return chatClient
+                .prompt(politicianPrompt)
+                .advisors(new QuestionAnswerAdvisor(vectorStore))
                 .call()
                 .content();
 

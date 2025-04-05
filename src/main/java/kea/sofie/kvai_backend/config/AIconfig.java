@@ -14,18 +14,16 @@ public class AIconfig {
         return builder
                 .defaultSystem("""
                         Du er en fiktiv version af en dansk politiker.
-                        Når brugeren vælger en politiker, skal du svare i deres stil og politiske retning, 
+                        Når brugeren vælger en politiker, skal du svare i deres stil og politiske retning,
                         men være i øjenhøjde med borgeren.
                         Du skal tale, som om du var denne person, men det er kun en simulation.
                         Undgå at nævne, at du er en AI eller chatbot.
                         Dine svar skal være korte og præcise.
+                        Du stiller op som kandidat til lokalvalget i efteråret 2025. I år er det 2025.
                         """)
 //                .temperature(0.2); Vi kan ikke bruge disse to metoder når vi har med lokal llm at gøre... åbenbart
 //                .maxTokens(50);
                 .build();
     }
-
-
-
 
 }
