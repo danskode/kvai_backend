@@ -20,12 +20,11 @@ public class DocumentIngestionService implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(DocumentIngestionService.class);
     @Value("classpath:/poldocs/jacob-naesager.pdf")
     private Resource jacobnaesagerPdf;
+    private final VectorStore vectorStore;
 
     public DocumentIngestionService(VectorStore vectorStore) {
         this.vectorStore = vectorStore;
     }
-
-    private final VectorStore vectorStore;
 
     @Override
     public void run(String... args) throws Exception {

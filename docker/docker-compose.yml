@@ -1,6 +1,22 @@
-version: '3.8'
-
 services:
+#  ollama:
+#    image: ollama/ollama
+#    container_name: ollama
+#    restart: always
+#    ports:
+#      - "12434:12434"
+#    volumes:
+#      - ollama_models:/root/.ollama  # to persist downloaded models
+#    tty: true  # required for interactive shell
+#    environment:
+#      - OLLAMA_MODELS=/root/.ollama
+#    healthcheck:
+#      test: ["CMD", "curl", "-f", "http://localhost:12434"]
+#      interval: 60s
+#      retries: 5
+#      start_period: 120s  # Wait longer before starting the health checks
+#      timeout: 10s  # Timeout for each health check request
+
   pgvector-db:
     image: ankane/pgvector
     container_name: pgvector
@@ -11,3 +27,6 @@ services:
       POSTGRES_DB: vectordb
       POSTGRES_USER: ${PGVECTOR_USER}
       POSTGRES_PASSWORD: ${PGVECTOR_PASSWORD}
+
+#volumes:
+#  ollama_models:
