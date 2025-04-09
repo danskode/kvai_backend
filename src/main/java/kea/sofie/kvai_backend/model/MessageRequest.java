@@ -16,4 +16,6 @@ public class MessageRequest {
 
     private String politician;
 
+    private String conversationId; // chathistorik
+
 }

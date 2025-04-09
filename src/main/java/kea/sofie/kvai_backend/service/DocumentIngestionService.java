@@ -18,7 +18,7 @@ import java.util.List;
 public class DocumentIngestionService implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentIngestionService.class);
-    @Value("classpath:/poldocs/jacob-naesager.pdf")
+    @Value("classpath:/poldocs/jakob-naesager.pdf")
     private Resource jacobnaesagerPdf;
     private final VectorStore vectorStore;
 
@@ -33,10 +33,22 @@ public class DocumentIngestionService implements CommandLineRunner {
         TikaDocumentReader reader = new TikaDocumentReader(jacobnaesagerPdf);
         // Split the documents ...
         TextSplitter textSplitter = new TokenTextSplitter();
-        List<Document> documents = textSplitter.split(reader.read() );
-        // Store the data in the vector database ...
-        vectorStore.accept(documents);
-        log.info("Loaded {} documents", documents.size());
-
+        try {
+            // Read and split the document
+            List<Document> documents = textSplitter.split(reader.read());
+            vectorStore.accept(documents);
+            // Efter vectorStore.accept(documents);
+            log.info("Dokumenter gemt i VectorStore: {}", documents.size());
+            for (Document doc : documents) {
+                log.info("Dokument indhold: {}", doc.getText());
+            }
+            log.info("Loaded {} documents", documents.size());
+        } catch (Exception e) {
+            log.error("Error processing the document: {}", e.getMessage(), e);
+        }
+//        List<Document> documents = textSplitter.split(reader.read());
+//        // Store the data in the vector database ...
+////        vectorStore.accept(documents);
+//        log.info("Loaded {} documents", documents.size());
     }
-}
+    }
