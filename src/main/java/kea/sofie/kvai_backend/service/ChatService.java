@@ -1,6 +1,7 @@
 package kea.sofie.kvai_backend.service;
 
 import kea.sofie.kvai_backend.model.Politician;
+import kea.sofie.kvai_backend.repository.PoliticianRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -13,27 +14,29 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
 
 @Service
 public class ChatService {
 
     private static final Logger log = LoggerFactory.getLogger(ChatService.class);
-    private List<Politician> politicians;
     private ChatClient chatClient;
-    //    private final ChatClient.Builder chatClientBuilder;
     private final VectorStore vectorStore;
+    private final PoliticianRepository politicianRepository;
+
 
     @Autowired
     public ChatService(ChatClient chatClient,
-                       VectorStore vectorStore) {
+                       VectorStore vectorStore,
+                       PoliticianRepository politicianRepository) {
         this.chatClient = chatClient;
-        this.politicians = List.of(
-                new Politician("Mette Frederiksen", "Socialdemokratiet"),
-                new Politician("Jakob Næsager", "Konservative"),
-                new Politician("Mia Nyegaard", "Radikale Venstre")
-        );
         this.vectorStore = vectorStore;
+        this.politicianRepository = politicianRepository;
+    }
+
+    public List<Politician> getPoliticiansFromMySQL() {
+        return politicianRepository.findAll();
     }
 
     private String getPromptForPolitician(String name) {
@@ -68,13 +71,10 @@ public class ChatService {
                                 String conversationId,
                                 ChatMemory chatMemory) {
 
-        Politician selectedPolitician = politicians.stream()
-                .filter(p -> p.getName().equalsIgnoreCase(politicianName))
-                .findFirst()
-                .orElse(null);
+        Politician selectedPolitician = politicianRepository.findByName(politicianName);
 
-        if (selectedPolitician == null) {
-            return "Beklager, jeg kunne ikke finde den valgte politiker.";
+        if(selectedPolitician == null) {
+            return "Beklager, kunne ikke finde den valgte politiker...";
         }
 
         String politicianPrompt = getPromptForPolitician(selectedPolitician.getName());
