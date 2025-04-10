@@ -74,9 +74,7 @@ public class ChatService {
 
         String politicianPrompt = getPromptForPolitician(selectedPolitician.getName());
         String fullPrompt = buildSystemPrompt(politicianPrompt);
-        log.debug("Politician Prompt: {}", politicianPrompt);
-        log.debug("Full Prompt: {}", fullPrompt);
-//        ChatClient chatClient = chatClientBuilder.build();
+
         // Juster SearchRequest for at få de bedste resultater fra vectorStore
         SearchRequest searchRequest = SearchRequest.builder()
                 .query(userMessage)
