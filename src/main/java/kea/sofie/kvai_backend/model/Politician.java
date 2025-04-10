@@ -20,9 +20,14 @@ public class Politician {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto-incremented primary key
     private int id;
-
     private String name;
     private String party;
     private String area;
+
+    public Politician(String name, String party, String area) {
+        this.name = name;
+        this.party = party;
+        this.area = area;
+    }
 
 }

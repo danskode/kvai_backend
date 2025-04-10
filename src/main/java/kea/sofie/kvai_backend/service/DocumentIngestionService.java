@@ -1,5 +1,7 @@
 package kea.sofie.kvai_backend.service;
 
+import kea.sofie.kvai_backend.model.Politician;
+import kea.sofie.kvai_backend.repository.PoliticianRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
@@ -21,18 +23,33 @@ public class DocumentIngestionService implements CommandLineRunner {
     @Value("classpath:/poldocs/jakob-naesager.pdf")
     private Resource jacobnaesagerPdf;
     private final VectorStore vectorStore;
+    private final PoliticianRepository politicianRepository;
 
-    public DocumentIngestionService(VectorStore vectorStore) {
+    public DocumentIngestionService(VectorStore vectorStore, PoliticianRepository politicianRepository) {
         this.vectorStore = vectorStore;
+        this.politicianRepository = politicianRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
 
+        if(politicianRepository.findAll().size() == 0) {
+
+            Politician politician1 = new Politician("Jakob Næsager", "Det Konservative Folkeparti 🫡", "København");
+            Politician politician2 = new Politician("Mia Nygaard", "Det Radikale Venstre 🟪", "København");
+            Politician politician3 = new Politician("Pernille Rosenkrantz-Theil", "Socialdemokratiet 🌹", "København");
+
+            politicianRepository.save(politician1);
+            politicianRepository.save(politician2);
+            politicianRepository.save(politician3);
+        }
+
+
         // Read the documents ...
         TikaDocumentReader reader = new TikaDocumentReader(jacobnaesagerPdf);
         // Split the documents ...
-        TextSplitter textSplitter = new TokenTextSplitter();
+        TextSplitter textSplitter = new TokenTextSplitter(150, 5, 1, 10000, true);
+
         try {
             // Read and split the document
             List<Document> documents = textSplitter.split(reader.read());
@@ -46,9 +63,5 @@ public class DocumentIngestionService implements CommandLineRunner {
         } catch (Exception e) {
             log.error("Error processing the document: {}", e.getMessage(), e);
         }
-//        List<Document> documents = textSplitter.split(reader.read());
-//        // Store the data in the vector database ...
-////        vectorStore.accept(documents);
-//        log.info("Loaded {} documents", documents.size());
     }
-    }
+}
