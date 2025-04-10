@@ -71,7 +71,7 @@ public class ChatController {
         String sessionId = session.getId();
         System.out.println("Session ID: " + sessionId + " / Politiker: " + politicianName);
 
-        // kald  ChatService, som står for at snakke med AI'en og give borgeren svar
+        // kald ChatService, som står for at snakke med AI'en og give borgeren svar
         String aiResponse = chatService.getAIResponse(
                 messageRequest.getMessage(),
                 politicianName,
