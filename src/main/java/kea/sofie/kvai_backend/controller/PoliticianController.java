@@ -20,7 +20,7 @@ public class PoliticianController {
 
     @GetMapping("/politikere")
     public List<Politician> getAllPoliticians() {
-        return chatService.getPoliticiansFromMySQL();
+        return chatService.getPoliticians();
     }
 
 

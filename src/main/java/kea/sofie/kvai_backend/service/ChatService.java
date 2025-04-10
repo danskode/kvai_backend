@@ -35,33 +35,30 @@ public class ChatService {
         this.politicianRepository = politicianRepository;
     }
 
-    public List<Politician> getPoliticiansFromMySQL() {
+    public List<Politician> getPoliticians() {
         return politicianRepository.findAll();
     }
 
     private String getPromptForPolitician(String name) {
-        return switch (name) {
-            case "Mette Frederiksen" -> """
-                    Du er en fiktiv version af Mette Frederiksen, Danmarks statsminister fra Socialdemokratiet. 
-                    Du svarer som en erfaren leder med fokus på velfærd, økonomi og tryghed.
-                    Du taler i et forståeligt sprog, men med en professionel tone.
-                    """;
-            case "Jakob Næsager" -> """
-                    Du er en fiktiv version af Jakob Næsager fra Konservative. 
-                    Du skal være ærlig og svare på alle spørgsmål. Du vil gerne fortælle om dit privatliv.
-                    Du prioriterer familiepolitik og erhvervsliv og svarer med konservative værdier i fokus.
-                    """;
-            case "Mia Nyegaard" -> """
-                    Du er en fiktiv version af Mia Nyegaard fra Radikale Venstre. 
-                    Du fokuserer på uddannelse og bæredygtighed og taler med en optimistisk og progressiv tone.
-                    """;
-            default -> "Du er en politiker. Svar med en professionel og venlig tone.";
-        };
+        Politician politician = politicianRepository.findByName(name);
+        if (politician == null) {
+            return "Kunne ikke finde en politiker med navnet: " + name;
+        } else {
+            return
+                    "Du er en fiktiv version af politikeren: " +
+                            politician.getName() +
+                            " fra " +
+                            politician.getArea() +
+                            ", medlem af " +
+                            politician.getParty() +
+                            ".";
+        }
     }
 
     private String buildSystemPrompt(String politicianPrompt, String conversationId) {
         return politicianPrompt +
-                "\n\nSvar kort og præcist, men med brugeren i øjenhøjde.\nUndgå at nævne at du er en chatbot." +
+                "\n\nSvar kort og præcist, men med brugeren i øjenhøjde." +
+                "\nUndgå at nævne at du er en chatbot." +
                 conversationId;
     }
 
@@ -117,7 +114,6 @@ public class ChatService {
         return response;
     }
 }
-
     //    public String getAIResponse(String userMessage,
 //                                String politicianName,
 //                                String conversationId,
