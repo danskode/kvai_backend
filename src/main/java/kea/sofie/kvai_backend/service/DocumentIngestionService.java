@@ -48,7 +48,7 @@ public class DocumentIngestionService implements CommandLineRunner {
         // Read the documents ...
         TikaDocumentReader reader = new TikaDocumentReader(jacobnaesagerPdf);
         // Split the documents ...
-        TextSplitter textSplitter = new TokenTextSplitter(150, 5, 1, 10000, true);
+        TextSplitter textSplitter = new TokenTextSplitter(125, 75, 25, 10000, true);
 
         try {
             // Read and split the document
