@@ -10,7 +10,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
-import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.ollama.OllamaChatModel;
 
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -18,7 +17,8 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -27,61 +27,59 @@ public class ChatController {
 
     private final ChatService chatService;
     private final VectorStore vectorStore;
-    private final ChatModel chatModel;
     private OllamaChatModel ollamaChatModel;
 
 
-    public ChatController(ChatService chatService, VectorStore vectorStore, OllamaChatModel ollamaChatModel, ChatModel chatModel) {
+    public ChatController(ChatService chatService, VectorStore vectorStore, OllamaChatModel ollamaChatModel) {
         this.chatService = chatService;
         this.vectorStore = vectorStore;
         this.ollamaChatModel = ollamaChatModel;
-        this.chatModel = chatModel;
     }
 
 
+    // fjernet conversationId, da det var overflødigt til vores lille projekt.
+    // skiftet over til at gemme chats i Map. politicanName som nøgle.
     @PostMapping("/chat")
     public ResponseEntity<ChatResponse> chatWithCandidate(
             @RequestBody MessageRequest messageRequest,
             HttpServletRequest request) {
-        HttpSession session = request.getSession(false); // der oprettes ikke en ny session hvis den ikke findes
-        if (session == null) {
-            //hvis session ikke findes -> opret en ny
-            session = request.getSession(true);
-        }
 
+        // der oprettes en ny session hvis den ike findes
+        HttpSession session = request.getSession(true);
 
-        ChatMemory chatMemory = (ChatMemory) session.getAttribute("chatMemory");
-        // hvis der ikke findes en chat i denne session, så opretter den en ny og gemmer i sessionen.
-        if (chatMemory == null) {
+        // henter eller opretter Map til at holde styr på chatMemory pr. politiker.
+        //  så kan borgeren chatte med flere politikere i samme session uden at miste historikken
+        Map<String, ChatMemory> chatMemoryMap = (Map<String, ChatMemory>) session.getAttribute("chatMemoryMap");
+            if(chatMemoryMap == null) {
+                // hvis det er første gang en borger chatter, så oprettes et nyt tomt Map
+                chatMemoryMap = new HashMap<>();
+                session.setAttribute("chatMemoryMap", chatMemoryMap);
+            }
+
+        // navnet på politikeren vælges fra frontend'en (borgeren)
+        String politicianName = messageRequest.getPolitician();
+
+        // tjekker om der allerede er en chat-historik med denne politiker i sessionen
+        ChatMemory chatMemory = chatMemoryMap.get(politicianName);
+        if(chatMemory == null) {
+            // hvis ikke -> opret ny historik (InMemory = bare gemt i hukommelsen, ikke DB)
             chatMemory = new InMemoryChatMemory();
-            session.setAttribute("chatMemory", chatMemory);
+            chatMemoryMap.put(politicianName, chatMemory);
         }
 
-        String conversationId = (String) session.getAttribute("conversationId");
-
+        // bare lidt debug til at kontrollere sessionID
         String sessionId = session.getId();
+        System.out.println("Session ID: " + sessionId + " / Politiker: " + politicianName);
 
-        System.out.println("SessionId: " + sessionId);
-
-        if (conversationId == null) {
-            conversationId = UUID.randomUUID().toString();
-            session.setAttribute("conversationId", conversationId);
-            System.out.println("Nyt conversationId genereret: " + conversationId);
-        } else {
-            System.out.println("Bruger et eksisterende conversationId: " + conversationId);
-        }
-
+        // kald  ChatService, som står for at snakke med AI'en og give borgeren svar
         String aiResponse = chatService.getAIResponse(
                 messageRequest.getMessage(),
-                messageRequest.getPolitician(),
-                conversationId,
+                politicianName,
                 chatMemory
         );
 
-        System.out.println("SESSION ID: " + sessionId + " Conversation ID: " + conversationId);
-
+        // send AI's svar tilbage til frontend'en
         return ResponseEntity.ok(new ChatResponse(aiResponse));
-
         }
 
 
@@ -112,12 +110,7 @@ public class ChatController {
                 .content();
 
         return chatBotResponse;
-
     }
-
-
-
-
 }
 
 

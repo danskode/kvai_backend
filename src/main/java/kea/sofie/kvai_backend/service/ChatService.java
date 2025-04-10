@@ -55,17 +55,15 @@ public class ChatService {
         }
     }
 
-    private String buildSystemPrompt(String politicianPrompt, String conversationId) {
+    private String buildSystemPrompt(String politicianPrompt) {
         return politicianPrompt +
                 "\n\nSvar kort og præcist, men med brugeren i øjenhøjde." +
-                "\nUndgå at nævne at du er en chatbot." +
-                conversationId;
+                "\nUndgå at nævne at du er en chatbot.";
     }
 
 
     public String getAIResponse(String userMessage,
                                 String politicianName,
-                                String conversationId,
                                 ChatMemory chatMemory) {
 
         Politician selectedPolitician = politicianRepository.findByName(politicianName);
@@ -75,7 +73,7 @@ public class ChatService {
         }
 
         String politicianPrompt = getPromptForPolitician(selectedPolitician.getName());
-        String fullPrompt = buildSystemPrompt(politicianPrompt, conversationId);
+        String fullPrompt = buildSystemPrompt(politicianPrompt);
         log.debug("Politician Prompt: {}", politicianPrompt);
         log.debug("Full Prompt: {}", fullPrompt);
 //        ChatClient chatClient = chatClientBuilder.build();
