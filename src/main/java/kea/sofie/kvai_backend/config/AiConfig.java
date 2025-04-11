@@ -35,5 +35,4 @@ public class AiConfig {
                 .defaultAdvisors(questionAnswerAdvisor)
                 .build();
     }
-
 }
