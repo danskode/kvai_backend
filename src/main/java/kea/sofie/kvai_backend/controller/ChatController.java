@@ -10,7 +10,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
-import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.ai.chat.model.ChatModel;
+//import org.springframework.ai.ollama.OllamaChatModel;
 
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -27,14 +28,20 @@ public class ChatController {
 
     private final ChatService chatService;
     private final VectorStore vectorStore;
-    private OllamaChatModel ollamaChatModel;
+    private final ChatModel ollamaChatModel;
 
 
-    public ChatController(ChatService chatService, VectorStore vectorStore, OllamaChatModel ollamaChatModel) {
+    public ChatController(ChatService chatService, VectorStore vectorStore, ChatModel ollamaChatModel) {
         this.chatService = chatService;
         this.vectorStore = vectorStore;
         this.ollamaChatModel = ollamaChatModel;
     }
+
+//    public ChatController(ChatService chatService, VectorStore vectorStore, OllamaChatModel ollamaChatModel) {
+//        this.chatService = chatService;
+//        this.vectorStore = vectorStore;
+//        this.ollamaChatModel = ollamaChatModel;
+//    }
 
 
     // fjernet conversationId, da det var overflødigt til vores lille projekt.
@@ -83,34 +90,34 @@ public class ChatController {
         }
 
 
-    //Denne er nu nogenlunde klar ...
-    @PostMapping("/ragtest")
-    public String ragTest(@RequestBody MessageRequest request) {
-        String message = request.getMessage();
-
-        String chatBotResponse = ChatClient.builder(ollamaChatModel)
-                .build()
-                .prompt()
-                .system("""
-                        Med udgangspunkt i teksten, skal du svare mig på dansk.
-                        Svar som om du er Jakob Næsager.
-                        Du er forfatteren bag indholdet og står bag holdninger og meninger i teksten.
-                        Du er nuværende børne- og ungdomsborgmester, men stiller op til borgerrepræsentationen.
-                        Måske har du en chance for at blive overborgmester?
-                        u stiller op til kommunalvalget i København i år, 2025.
-                        Svar som om jeg er en vælger, der skal overbevises om dine kvalifikationer.
-                        Du må ikke afvige fra teksten.
-                        Og du skal svare kort, som i en chatbesked.
-                        Hvis ikke svaret er i teksten, så svar at du ikke ved det.
-                        """)
-                .advisors(new QuestionAnswerAdvisor(this.vectorStore,
-                        SearchRequest.builder().similarityThreshold(0.5).topK(5).build()))
-                .user(message)
-                .call()
-                .content();
-
-        return chatBotResponse;
-    }
+//    //Denne er nu nogenlunde klar ...
+//    @PostMapping("/ragtest")
+//    public String ragTest(@RequestBody MessageRequest request) {
+//        String message = request.getMessage();
+//
+//        String chatBotResponse = ChatClient.builder(ollamaChatModel)
+//                .build()
+//                .prompt()
+//                .system("""
+//                        Med udgangspunkt i teksten, skal du svare mig på dansk.
+//                        Svar som om du er Jakob Næsager.
+//                        Du er forfatteren bag indholdet og står bag holdninger og meninger i teksten.
+//                        Du er nuværende børne- og ungdomsborgmester, men stiller op til borgerrepræsentationen.
+//                        Måske har du en chance for at blive overborgmester?
+//                        u stiller op til kommunalvalget i København i år, 2025.
+//                        Svar som om jeg er en vælger, der skal overbevises om dine kvalifikationer.
+//                        Du må ikke afvige fra teksten.
+//                        Og du skal svare kort, som i en chatbesked.
+//                        Hvis ikke svaret er i teksten, så svar at du ikke ved det.
+//                        """)
+//                .advisors(new QuestionAnswerAdvisor(this.vectorStore,
+//                        SearchRequest.builder().similarityThreshold(0.5).topK(5).build()))
+//                .user(message)
+//                .call()
+//                .content();
+//
+//        return chatBotResponse;
+//    }
 }
 
 
