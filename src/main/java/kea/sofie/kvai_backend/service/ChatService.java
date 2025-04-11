@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ChatService {
@@ -24,7 +25,6 @@ public class ChatService {
     private ChatClient chatClient;
     private final VectorStore vectorStore;
     private final PoliticianRepository politicianRepository;
-
 
     @Autowired
     public ChatService(ChatClient chatClient,
@@ -110,73 +110,5 @@ public class ChatService {
         return response;
     }
 }
-    //    public String getAIResponse(String userMessage,
-//                                String politicianName,
-//                                String conversationId,
-//                                ChatMemory chatMemory) {
-//
-//        Politician selectedPolitician = politicians.stream()
-//                .filter(p -> p.getName().equalsIgnoreCase(politicianName))
-//                .findFirst()
-//                .orElse(null);
-//
-//        if (selectedPolitician == null) {
-//            return "Beklager, jeg kunne ikke finde den valgte politiker.";
-//        }
-//
-//        String politicianPrompt = getPromptForPolitician(selectedPolitician.getName());
-//        String fullPrompt = buildSystemPrompt(politicianPrompt, conversationId);
-//
-//        log.debug("Politician Prompt: {}", politicianPrompt);
-//        log.debug("Full Prompt: {}", fullPrompt);
-//
-//        // Lav søgning i vectorstore (RAG)
-//        SearchRequest searchRequest = SearchRequest.builder()
-//                .query(userMessage)
-//                .similarityThreshold(0.1)
-//                .topK(10)
-//                .build();
-//
-//        List<Document> docs = vectorStore.similaritySearch(searchRequest);
-//        log.info("Antal dokumenter fundet: " + docs.size());
-//
-//        StringBuilder contextBuilder = new StringBuilder();
-//        for (Document doc : docs) {
-//            log.info("Dokument indhold: " + doc.getText());
-//            contextBuilder.append(doc.getText()).append("\n");
-//        }
-//
-//        // Byg det endelige prompt med kontekst og spørgsmål
-//        String context = docs.stream()
-//                .map(Document::getText)
-//                .collect(Collectors.joining("\n"));
-//
-//        String finalPrompt = """
-//Du er en dansk politiker, der svarer en borger. Du svarer altid på dansk.
-//Svar kun baseret på den følgende information. Hvis du ikke kan finde svaret, så sig: "Det ved jeg ikke."
-//
-//Baggrundsinformation:
-//%s
-//
-//Spørgsmål fra borgeren:
-//%s
-//""".formatted(context, userMessage);
-//
-//        log.debug("Final Prompt til LLM:\n{}", finalPrompt);
-//        System.out.println("========= FINAL PROMPT =========\n" + finalPrompt);
-//
-//        System.out.println("========= DEBUG OUTPUT =========");
-//        System.out.println("Context used:\n" + context);
-//        System.out.println("User question:\n" + userMessage);
-//
-//        // Kald den lokale LLM (uden QuestionAnswerAdvisor)
-//        return chatClient
-//                .prompt(finalPrompt)
-//                .advisors(
-//                        new MessageChatMemoryAdvisor(chatMemory) // Vi beholder memory advisor
-//                )
-//                .call()
-//                .content();
-//    }
 
 
