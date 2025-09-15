@@ -21,14 +21,13 @@ Projektet er lavet af @kvetny og @danskode
 - Moderne, brugervenlig React-frontend  
 
 ## Teknologistak  
-- **Frontend:** React, Vite/CRA, TailwindCSS (hvis relevant), WebSocket/HTTP til kommunikation  
+- **Frontend:** Plain JavaScript  
 - **Backend:** Java, Spring Boot, REST API, OpenAI SDK  
-- **Andet:** Docker (valgfrit), PostgreSQL/MySQL (hvis database er i brug)  
+- **Andet:** Docker (valgfrit), PostgreSQL
 
 ## Kom i gang  
 
 ### Krav  
-- Node.js (v18+)  
 - Java 17+  
 - OpenAI API key  
 
