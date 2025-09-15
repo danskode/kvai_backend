@@ -1,4 +1,4 @@
-# KVAI – Kandidatvalg AI  
+# KVAI – KandidatAI til kommunalvalget i 2025 #kv25
 
 ![GIF to illustrate the system in action](/src/main/resources/static/kv25ai.gif)
 
